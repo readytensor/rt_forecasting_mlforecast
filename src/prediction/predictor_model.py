@@ -203,7 +203,7 @@ class Forecaster:
         elif self.data_schema.static_covariates:
             static_features = self.data_schema.static_covariates
 
-        history = self.prepare_data(history, is_train=True)
+        history = self.prepare_data(history)
 
         self.model.fit(
             df=history,
@@ -228,11 +228,16 @@ class Forecaster:
         if not self._is_trained:
             raise NotFittedError("Model is not fitted yet.")
 
-        future_df = self.model.make_future_dataframe(self.data_schema.forecast_length)
         if self.use_exogenous and self.data_schema.future_covariates:
+            future_df = self.model.make_future_dataframe(
+                self.data_schema.forecast_length
+            )
             future_df[self.data_schema.future_covariates] = test_data[
                 self.data_schema.future_covariates
             ]
+        else:
+            future_df = None
+
         forecast = self.model.predict(self.data_schema.forecast_length, X_df=future_df)
         forecast[prediction_col_name] = forecast.drop(
             columns=[self.data_schema.time_col, self.data_schema.id_col]
