@@ -3,7 +3,7 @@ import warnings
 import joblib
 import numpy as np
 import pandas as pd
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Union
 from schema.data_schema import ForecastingSchema
 from sklearn.exceptions import NotFittedError
 from mlforecast import MLForecast
@@ -36,9 +36,9 @@ class Forecaster:
         lags_forecast_ratio: int = None,
         lags: Optional[Iterable] = None,
         n_estimators: int = 100,
-        max_depth: int = 20,
-        min_samples_split: int = 10,
-        min_samples_leaf: int = 3,
+        max_depth: int = None,
+        min_samples_split: Union[int, float] = 2,
+        min_samples_leaf: Union[int, float] = 1,
         alpha: float = 1.0,
         use_exogenous: bool = True,
         random_state: int = 0,
@@ -62,6 +62,26 @@ class Forecaster:
                 This parameters overides lags parameter and uses the most recent values as lags.
 
             lags (Optional[Iterable]): Lags of the target to use as features.
+
+            n_estimators: (int)
+                The number of trees in the forest.
+
+            max_depth (int): The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+
+            min_samples_split (Unuion[int, float]) :
+                The minimum number of samples required to split an internal node:
+                If int, values must be in the range [2, inf).
+                If float, values must be in the range (0.0, 1.0] and min_samples_split will be ceil(min_samples_split * n_samples).
+
+            min_samples_leaf (Unuion[int, float]) :
+                The minimum number of samples required to be at a leaf node.
+                A split point at any depth will only be considered if it leaves at least min_samples_leaf training samples in each of the left and right branches.
+                This may have the effect of smoothing the model, especially in regression.
+                If int, values must be in the range [1, inf).
+                If float, values must be in the range (0.0, 1.0) and min_samples_leaf will be ceil(min_samples_leaf * n_samples).
+
+            alpha (float):
+                Constant that multiplies the L2 term, controlling regularization strength. alpha must be a non-negative float i.e. in [0, inf).
 
             use_exogenous (bool): If true, uses covariates in training.
 
@@ -141,10 +161,15 @@ class Forecaster:
         if frequency in ["secondly", "other"]:
             return "S"
 
-    def prepare_data(self, data: pd.DataFrame, is_train: bool = True) -> pd.DataFrame:
-        """ """
-        if is_train:
-            data.drop(columns=self.data_schema.past_covariates, inplace=True)
+    def prepare_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Prepares the training data by dropping past covariates, converting the index to datetime if available
+        and drops or keeps other covariates depending on use_exogenous.
+
+            Args:
+                data (pd.DataFrame): The training data.
+        """
+        data.drop(columns=self.data_schema.past_covariates, inplace=True)
 
         if self.data_schema.time_col_dtype in ["DATE", "DATETIME"]:
             data[self.data_schema.time_col] = pd.to_datetime(
@@ -154,11 +179,9 @@ class Forecaster:
         if not self.use_exogenous:
             if self.data_schema.future_covariates:
                 data.drop(columns=self.data_schema.future_covariates, inplace=True)
+
             if self.data_schema.static_covariates:
                 data.drop(columns=self.data_schema.static_covariates, inplace=True)
-
-        elif not is_train:
-            data.drop(columns=self.data_schema.static_covariates, inplace=True)
 
         return data
 
@@ -167,8 +190,6 @@ class Forecaster:
         history: pd.DataFrame,
     ) -> None:
         """Fit the Forecaster to the training data.
-        A separate Voting model is fit to each series that is contained
-        in the data.
 
         Args:
             history (pandas.DataFrame): The features of the training data.
