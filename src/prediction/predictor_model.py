@@ -197,11 +197,11 @@ class Forecaster:
         """
         np.random.seed(self.random_state)
 
-        if not self.use_exogenous:
-            static_features = None
-
-        elif self.data_schema.static_covariates:
+        if self.use_exogenous and len(self.data_schema.static_covariates) > 0:
             static_features = self.data_schema.static_covariates
+
+        else:
+            static_features = None
 
         history = self.prepare_data(history)
 
