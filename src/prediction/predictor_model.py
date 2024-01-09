@@ -158,8 +158,10 @@ class Forecaster:
             return "H"
         if frequency == "minutely":
             return "min"
-        if frequency in ["secondly", "other"]:
+        if frequency == "secondly":
             return "S"
+        else:
+            return 1
 
     def prepare_data(self, data: pd.DataFrame) -> pd.DataFrame:
         """
@@ -201,7 +203,7 @@ class Forecaster:
             static_features = self.data_schema.static_covariates
 
         else:
-            static_features = None
+            static_features = []
 
         history = self.prepare_data(history)
 
