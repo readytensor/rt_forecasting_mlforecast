@@ -142,6 +142,9 @@ class Forecaster:
 
         Returns (str): The mapped frequency.
         """
+        if self.data_schema.time_col_dtype == "INT":
+            return 1
+
         frequency = frequency.lower()
         frequency = frequency.split("frequency.")[1]
         if frequency == "yearly":
