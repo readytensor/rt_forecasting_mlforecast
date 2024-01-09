@@ -247,6 +247,7 @@ class Forecaster:
         forecast[prediction_col_name] = forecast.drop(
             columns=[self.data_schema.time_col, self.data_schema.id_col]
         ).mean(axis=1)
+        forecast[self.data_schema.time_col] = test_data[self.data_schema.time_col]
         return forecast
 
     def save(self, model_dir_path: str) -> None:
