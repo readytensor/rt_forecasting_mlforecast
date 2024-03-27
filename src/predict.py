@@ -91,6 +91,7 @@ def run_batch_predictions(
     """
 
     try:
+        with TimeAndMemoryTracker(logger=logger):
             logger.info("Making batch predictions...")
 
             logger.info("Loading schema...")
