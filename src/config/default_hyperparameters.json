@@ -7,5 +7,4 @@
   "min_samples_leaf": 3,
   "use_exogenous": true,
   "random_state": 0
-  
 }

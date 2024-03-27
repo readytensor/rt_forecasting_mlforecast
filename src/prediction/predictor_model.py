@@ -6,6 +6,7 @@ import pandas as pd
 from typing import Optional, Iterable, Union
 from schema.data_schema import ForecastingSchema
 from sklearn.exceptions import NotFittedError
+from multiprocessing import cpu_count
 from mlforecast import MLForecast
 from sklearn.linear_model import Ridge
 from mlforecast.target_transforms import LocalMinMaxScaler
@@ -21,6 +22,15 @@ warnings.filterwarnings("ignore")
 
 
 PREDICTOR_FILE_NAME = "predictor.joblib"
+
+# Determine the number of CPUs available
+n_cpus = cpu_count()
+
+# Set n_jobs to be one less than the number of CPUs, with a minimum of 1
+n_jobs = max(1, n_cpus - 1)
+print(f"Using n_jobs = {n_jobs}")
+
+
 logger = get_logger(task_name="model_training")
 
 
@@ -258,6 +268,7 @@ class Forecaster:
             freq=self.map_frequency(self.data_schema.frequency),
             lags=self.lags,
             target_transforms=[LocalMinMaxScaler()],
+            num_threads=n_jobs,
         )
 
         self.model.fit(
