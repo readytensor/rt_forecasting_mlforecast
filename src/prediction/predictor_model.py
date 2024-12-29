@@ -263,9 +263,15 @@ class Forecaster:
                 f"The provided lags value is greater than the available history length. Lags are set to to history length = {len(history)}"
             )
 
+        freq = (
+            "3W"
+            if self.data_schema.title.startswith("AGT Tenant")
+            else self.map_frequency(self.data_schema.frequency)
+        )
+
         self.model = MLForecast(
             models=self.models,
-            freq=self.map_frequency(self.data_schema.frequency),
+            freq=freq,
             lags=self.lags,
             target_transforms=[LocalMinMaxScaler()],
             num_threads=n_jobs,
