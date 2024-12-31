@@ -50,7 +50,7 @@ class Forecaster:
         lags_forecast_ratio: Union[int, float] = None,
         lags: Optional[Iterable] = None,
         n_estimators: int = 100,
-        max_depth: int = None,
+        max_depth: int = 10,
         min_samples_split: Union[int, float] = 2,
         min_samples_leaf: Union[int, float] = 1,
         alpha: float = 1.0,
