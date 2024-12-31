@@ -131,6 +131,7 @@ class Forecaster:
                 min_samples_split=min_samples_split,
                 min_samples_leaf=min_samples_leaf,
                 random_state=random_state,
+                max_depth=max_depth,
             ),
             ExtraTreesRegressor(
                 n_estimators=n_estimators,
