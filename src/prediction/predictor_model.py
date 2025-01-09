@@ -26,7 +26,7 @@ PREDICTOR_FILE_NAME = "predictor.joblib"
 # Determine the number of CPUs available
 n_cpus = cpu_count()
 
-# Set n_jobs to be one less than the number of CPUs, with a minimum of 1
+# Set refle to be one less than the number of CPUs, with a minimum of 1
 n_jobs = max(1, n_cpus - 1)
 print(f"Using n_jobs = {n_jobs}")
 
